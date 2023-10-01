@@ -1,0 +1,1 @@
+export const VERIFICATION_STATUS = ["Incomplete", "Under Verification", "Rejected", "Verified"]

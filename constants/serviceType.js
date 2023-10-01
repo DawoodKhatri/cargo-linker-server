@@ -1,0 +1,1 @@
+export const SERVICE_TYPES = ["Rail", "Road", "Ship", "Air"]
