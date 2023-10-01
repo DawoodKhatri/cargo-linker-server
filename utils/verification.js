@@ -25,7 +25,7 @@ export const sendVerificationMail = async (email, otp) => {
   );
 
   const template = handlebars.compile(htmlTemplate);
-  const html = template({ name: email.split("@")[0], otp: otp, validity: 5 });
+  const html = template({ name: email.split("@")[0], otp: otp, validity: 5 , api_url: process.env.API_URL});
 
   const options = {
     from: `${from} <${user}>`,

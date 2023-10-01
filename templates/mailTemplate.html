@@ -10,7 +10,7 @@
   </head>
   <body
     style="
-    width: 100%;
+      width: 100%;
       margin: 0;
       font-family: 'Montserrat', sans-serif;
       background-color: #efeaea;
@@ -25,13 +25,12 @@
         border-bottom: 2px solid #f13223;
       "
     >
-      
-      <div style="text-align: center; padding: 12px 0; margin-right: auto;">
+      <div style="text-align: center; padding: 12px 0; margin-right: auto">
         <h1 style="margin: 0">CargoLinker</h1>
       </div>
-      <div style="margin-left: auto;">
+      <div style="margin-left: auto">
         <img
-          src="http://localhost:5000/logo.png"
+          src="{{api_url}}/logo.png"
           width="85"
           height="55"
           style="display: block; object-fit: cover"
@@ -46,7 +45,7 @@
         address, we kindly request you to verify it using the following one-time
         password (OTP):
       </p>
-      <p style="font-weight: 600">OTP: {{OTP}}</p>
+      <p style="font-weight: 600">OTP: {{otp}}</p>
       <p>
         Please note that this OTP is valid for the next {{validity}} minutes.
       </p>
