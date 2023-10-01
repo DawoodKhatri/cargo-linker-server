@@ -11,12 +11,15 @@ export const isAuthenticated = async (req, res, next) => {
       });
 
     const { _id, role } = jwt.verify(token, process.env.JWT_SECRET);
+
+    req.role = role;
+
     switch (role) {
       case USER_ROLES.admin:
         break;
 
       case USER_ROLES.company:
-        req.company = await Company.findById(_id);
+        req.data = await Company.findById(_id);
         break;
 
       case USER_ROLES.client:
