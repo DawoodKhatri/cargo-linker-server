@@ -1,8 +1,14 @@
 import { Router } from "express";
-import { getVerificationMail } from "../controllers/company";
+import {
+  companyGetVerificationMail,
+  companyLogin,
+  companySignup,
+} from "../controllers/company";
 
-const companyRoutes = Router()
+const companyRoutes = Router();
 
-companyRoutes.post("/company/auth/verification", getVerificationMail)
+companyRoutes.post("/company/auth/verification", companyGetVerificationMail);
+companyRoutes.post("/company/auth/signup", companySignup);
+companyRoutes.post("/company/auth/login", companyLogin);
 
-export default companyRoutes
+export default companyRoutes;
