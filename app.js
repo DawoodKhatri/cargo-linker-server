@@ -1,8 +1,8 @@
 import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import authRoutes from "./routes/auth";
-import companyRoutes from "./routes/company";
+import authRoutes from "./routes/auth.js";
+import companyRoutes from "./routes/company.js";
 
 const app = express();
 
@@ -12,7 +12,7 @@ app.use(cookieParser());
 app.use(cors({ origin: "*" }));
 app.use(express.static("public"));
 
-app.use("/api", authRoutes);
-app.use("/api", companyRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/company", companyRoutes);
 
 export default app;

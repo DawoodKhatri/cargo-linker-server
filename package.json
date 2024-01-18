@@ -1,18 +1,17 @@
 {
-  "name": "cargo_linker_server",
+  "name": "cargo-linker-server",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node --experimental-specifier-resolution=node index.js",
-    "dev": "set NODE_ENV=development&&nodemon --experimental-specifier-resolution=node index.js"
+    "start": "node index.js",
+    "dev": "set NODE_ENV=development&&nodemon index.js"
   },
   "author": "Dawood Khatri",
   "license": "ISC",
   "dependencies": {
     "bcrypt": "^5.1.1",
-    "body-parser": "^1.20.2",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",

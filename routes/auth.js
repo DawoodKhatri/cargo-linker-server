@@ -1,10 +1,10 @@
 import { Router } from "express";
-import { isAuthenticated } from "../middlewares/checkAuth";
-import { getUser, logout } from "../controllers/auth";
+import { isAuthenticated } from "../middlewares/checkAuth.js";
+import { getUser, logout } from "../controllers/auth.js";
 
 const authRoutes = Router();
 
-authRoutes.post("/auth/logout", isAuthenticated, logout);
-authRoutes.get("/auth/details", isAuthenticated, getUser);
+authRoutes.post("/logout", isAuthenticated, logout);
+authRoutes.get("/details", isAuthenticated, getUser);
 
 export default authRoutes;

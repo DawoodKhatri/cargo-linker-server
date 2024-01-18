@@ -1,11 +1,12 @@
 import jwt from "jsonwebtoken";
-import { USER_ROLES } from "../constants/userRoles";
-import Company from "../models/company";
+import { USER_ROLES } from "../constants/userRoles.js";
+import Company from "../models/company.js";
+
 export const isAuthenticated = async (req, res, next) => {
   try {
     const { token } = req.cookies;
     if (!token)
-      return res.status(401).json({
+      return res.status(403).json({
         success: false,
         message: "Please login first",
       });
@@ -13,21 +14,31 @@ export const isAuthenticated = async (req, res, next) => {
     const { _id, role } = jwt.verify(token, process.env.JWT_SECRET);
 
     req.role = role;
+    req._id = _id;
 
-    switch (role) {
-      case USER_ROLES.admin:
-        break;
+    next();
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
 
-      case USER_ROLES.company:
-        req.data = await Company.findById(_id);
-        break;
+export const isCompany = async (req, res, next) => {
+  try {
+    if (req.role !== USER_ROLES.company)
+      return res.json(403, {
+        success: false,
+        message: "Please login as company first",
+      });
 
-      case USER_ROLES.client:
-        break;
+    const company = await Company.findById(req._id);
+    if (!company)
+      return res.json(403, {
+        success: false,
+        message: "Please login as company first",
+      });
 
-      default:
-        break;
-    }
+    req._id = undefined;
+    req.company = company.toObject();
 
     next();
   } catch (error) {

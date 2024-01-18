@@ -3,12 +3,22 @@ import {
   companyGetVerificationMail,
   companyLogin,
   companySignup,
-} from "../controllers/company";
+  submitCompanyVerificationDetails,
+} from "../controllers/company.js";
+import multer from "../middlewares/multer.js";
+import { isAuthenticated, isCompany } from "../middlewares/checkAuth.js";
 
 const companyRoutes = Router();
 
-companyRoutes.post("/company/auth/verification", companyGetVerificationMail);
-companyRoutes.post("/company/auth/signup", companySignup);
-companyRoutes.post("/company/auth/login", companyLogin);
+companyRoutes.post("/auth/verification", companyGetVerificationMail);
+companyRoutes.post("/auth/signup", companySignup);
+companyRoutes.post("/auth/login", companyLogin);
+companyRoutes.post(
+  "/auth/submitVerificationDetails",
+  isAuthenticated,
+  isCompany,
+  multer.any(),
+  submitCompanyVerificationDetails
+);
 
 export default companyRoutes;

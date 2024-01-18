@@ -1,28 +1,35 @@
 import { Schema, model } from "mongoose";
-import { SERVICE_TYPES } from "../constants/serviceType";
-import { VERIFICATION_STATUS } from "../constants/verificationStatus";
+import { SERVICE_TYPES } from "../constants/serviceType.js";
+import { VERIFICATION_STATUS } from "../constants/verificationStatus.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import { USER_ROLES } from "../constants/userRoles";
+import { USER_ROLES } from "../constants/userRoles.js";
 
 const { String, ObjectId } = Schema.Types;
 
-const companySchema = new Schema({
-  name: { type: String },
-  email: { type: String, unique: true, required: true },
-  password: { type: String, select: false, required: true },
-  registrationNumber: { type: String },
-  serviceType: { type: String, enum: SERVICE_TYPES },
-  verification: {
-    status: {
-      type: String,
-      enum: VERIFICATION_STATUS,
-      default: VERIFICATION_STATUS[0],
+const companySchema = new Schema(
+  {
+    email: { type: String, unique: true, required: true },
+    password: { type: String, select: false, required: true },
+    name: { type: String },
+    serviceType: { type: String, enum: SERVICE_TYPES },
+    registrationNumber: { type: String },
+    establishmentDate: { type: Date },
+    employeesCount: { type: Number },
+    valuation: { type: Number },
+    license: { type: String },
+    bankStatement: { type: String },
+    verification: {
+      status: {
+        type: String,
+        enum: Object.values(VERIFICATION_STATUS),
+        default: VERIFICATION_STATUS.incomplete,
+      },
+      remark: { type: String },
     },
-    remark: { type: String },
   },
-  documents: [{ type: ObjectId, ref: "Document" }],
-});
+  { versionKey: false }
+);
 
 companySchema.pre("save", async function (next) {
   if (this.isModified("password")) {

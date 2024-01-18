@@ -1,6 +1,14 @@
-import Company from "../models/company";
-import Verification from "../models/verification";
-import { generateOTP, sendVerificationMail } from "../utils/verification";
+import path from "path";
+import Company from "../models/company.js";
+import Verification from "../models/verification.js";
+import { generateOTP, sendVerificationMail } from "../utils/verification.js";
+import fs from "fs";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+import { VERIFICATION_STATUS } from "../constants/verificationStatus.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 export const companyGetVerificationMail = async (req, res) => {
   try {
@@ -127,6 +135,100 @@ export const companyLogin = async (req, res) => {
       success: true,
       message: "Login Successfull",
     });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const submitCompanyVerificationDetails = async (req, res) => {
+  try {
+    if (
+      req.company.verification.status === VERIFICATION_STATUS.underVerification
+    )
+      return res.status(409).json( {
+        success: false,
+        message: "Already submitted for verification",
+      });
+      
+    const {
+      name,
+      serviceType,
+      establishmentDate,
+      registrationNumber,
+      employeesCount,
+      valuation,
+    } = req.body;
+
+    const [license, bankStatement] = [
+      req.files.find(({ fieldname }) => fieldname === "license"),
+      req.files.find(({ fieldname }) => fieldname === "bankStatement"),
+    ];
+
+    if (
+      ![
+        name,
+        serviceType,
+        establishmentDate,
+        registrationNumber,
+        employeesCount,
+        valuation,
+        license,
+        bankStatement,
+      ].every(Boolean)
+    )
+      return res
+        .status(400)
+        .json({ success: false, message: "Please fill all the fields" });
+
+    fs.writeFileSync(
+      path.join(
+        __dirname,
+        "../uploaded files",
+        "license",
+        license.originalname
+      ),
+      license.buffer
+    );
+
+    fs.writeFileSync(
+      path.join(
+        __dirname,
+        "../uploaded files",
+        "bankStatement",
+        bankStatement.originalname
+      ),
+      bankStatement.buffer
+    );
+
+    const company = await Company.findByIdAndUpdate(
+      req.company._id,
+      {
+        $set: {
+          name,
+          serviceType,
+          establishmentDate,
+          registrationNumber,
+          employeesCount,
+          valuation,
+          license: path.join(
+            __dirname,
+            "../uploaded files",
+            license.originalname
+          ),
+          bankStatement: path.join(
+            __dirname,
+            "../uploaded files",
+            bankStatement.originalname
+          ),
+          verification: { status: VERIFICATION_STATUS.underVerification },
+        },
+      },
+      { new: true }
+    );
+
+    return res
+      .status(500)
+      .json({ success: true, message: "Details submitted for verification" });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });
   }

@@ -1,1 +1,6 @@
-export const VERIFICATION_STATUS = ["Incomplete", "Under Verification", "Rejected", "Verified"]
+export const VERIFICATION_STATUS = {
+  incomplete: "Incomplete",
+  underVerification: "Under Verification",
+  rejected: "Rejected",
+  verified: "Verified",
+}
