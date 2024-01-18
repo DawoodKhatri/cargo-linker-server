@@ -14,5 +14,8 @@ app.use(express.static("public"));
 
 app.use("/api/auth", authRoutes);
 app.use("/api/company", companyRoutes);
+app.use("*", (req, res) => {
+  return res.status(404).json({ success: false, message: "Invalid Request" });
+});
 
 export default app;
