@@ -1,3 +1,5 @@
+/** @type {import("express").RequestHandler} */
+
 import path from "path";
 import Company from "../models/company.js";
 import Verification from "../models/verification.js";
@@ -140,24 +142,35 @@ export const companyLogin = async (req, res) => {
   }
 };
 
+export const getCompanyVerificationStatus = async (req, res) => {
+  try {
+    return res.status(200).json({
+      success: true,
+      data: {
+        status: req.company.verification.status,
+        message:
+          req.company.verification.status === VERIFICATION_STATUS.rejected
+            ? req.company.verification.message
+            : undefined,
+      },
+    });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 export const submitCompanyVerificationDetails = async (req, res) => {
   try {
     if (
       req.company.verification.status === VERIFICATION_STATUS.underVerification
     )
-      return res.status(409).json( {
+      return res.status(409).json({
         success: false,
         message: "Already submitted for verification",
       });
-      
-    const {
-      name,
-      serviceType,
-      establishmentDate,
-      registrationNumber,
-      employeesCount,
-      valuation,
-    } = req.body;
+
+    const { name, serviceType, establishmentDate, registrationNumber } =
+      req.body;
 
     const [license, bankStatement] = [
       req.files.find(({ fieldname }) => fieldname === "license"),
@@ -170,8 +183,6 @@ export const submitCompanyVerificationDetails = async (req, res) => {
         serviceType,
         establishmentDate,
         registrationNumber,
-        employeesCount,
-        valuation,
         license,
         bankStatement,
       ].every(Boolean)
@@ -180,25 +191,25 @@ export const submitCompanyVerificationDetails = async (req, res) => {
         .status(400)
         .json({ success: false, message: "Please fill all the fields" });
 
-    fs.writeFileSync(
-      path.join(
-        __dirname,
-        "../uploaded files",
-        "license",
-        license.originalname
-      ),
-      license.buffer
-    );
+    // fs.writeFileSync(
+    //   path.join(
+    //     __dirname,
+    //     "../uploaded files",
+    //     "license",
+    //     license.originalname
+    //   ),
+    //   license.buffer
+    // );
 
-    fs.writeFileSync(
-      path.join(
-        __dirname,
-        "../uploaded files",
-        "bankStatement",
-        bankStatement.originalname
-      ),
-      bankStatement.buffer
-    );
+    // fs.writeFileSync(
+    //   path.join(
+    //     __dirname,
+    //     "../uploaded files",
+    //     "bankStatement",
+    //     bankStatement.originalname
+    //   ),
+    //   bankStatement.buffer
+    // );
 
     const company = await Company.findByIdAndUpdate(
       req.company._id,
@@ -208,18 +219,18 @@ export const submitCompanyVerificationDetails = async (req, res) => {
           serviceType,
           establishmentDate,
           registrationNumber,
-          employeesCount,
-          valuation,
-          license: path.join(
-            __dirname,
-            "../uploaded files",
-            license.originalname
-          ),
-          bankStatement: path.join(
-            __dirname,
-            "../uploaded files",
-            bankStatement.originalname
-          ),
+          // license: path.join(
+          //   __dirname,
+          //   "../uploaded files",
+          //   license.originalname
+          // ),
+          // bankStatement: path.join(
+          //   __dirname,
+          //   "../uploaded files",
+          //   bankStatement.originalname
+          // ),
+          license: license.originalname,
+          bankStatement: bankStatement.originalname,
           verification: { status: VERIFICATION_STATUS.underVerification },
         },
       },
@@ -227,7 +238,7 @@ export const submitCompanyVerificationDetails = async (req, res) => {
     );
 
     return res
-      .status(500)
+      .status(200)
       .json({ success: true, message: "Details submitted for verification" });
   } catch (error) {
     return res.status(500).json({ success: false, message: error.message });

@@ -3,6 +3,7 @@ import {
   companyGetVerificationMail,
   companyLogin,
   companySignup,
+  getCompanyVerificationStatus,
   submitCompanyVerificationDetails,
 } from "../controllers/company.js";
 import multer from "../middlewares/multer.js";
@@ -13,6 +14,12 @@ const companyRoutes = Router();
 companyRoutes.post("/auth/verification", companyGetVerificationMail);
 companyRoutes.post("/auth/signup", companySignup);
 companyRoutes.post("/auth/login", companyLogin);
+companyRoutes.get(
+  "/auth/verificationStatus",
+  isAuthenticated,
+  isCompany,
+  getCompanyVerificationStatus
+);
 companyRoutes.post(
   "/auth/submitVerificationDetails",
   isAuthenticated,

@@ -15,8 +15,6 @@ const companySchema = new Schema(
     serviceType: { type: String, enum: SERVICE_TYPES },
     registrationNumber: { type: String },
     establishmentDate: { type: Date },
-    employeesCount: { type: Number },
-    valuation: { type: Number },
     license: { type: String },
     bankStatement: { type: String },
     verification: {
