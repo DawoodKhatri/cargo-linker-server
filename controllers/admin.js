@@ -31,10 +31,6 @@ export const adminLogin = async (req, res) => {
       sameSite: "none",
     };
 
-    if (process.env.NODE_ENV === "development") {
-      options = {};
-    }
-
     const token = await admin.generateToken();
 
     return successResponse({

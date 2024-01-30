@@ -4,8 +4,14 @@ import { errorResponse, successResponse } from "../utils/response.js";
 
 export const logout = async (req, res) => {
   try {
+    let options = {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+    };
+
     return successResponse({
-      res: res.clearCookie("token"),
+      res: res.clearCookie("token", options),
       message: "Logout Successfull",
     });
   } catch (error) {
@@ -15,9 +21,9 @@ export const logout = async (req, res) => {
 
 export const getUser = async (req, res) => {
   try {
-    const { data, role } = req;
+    const { role } = req;
 
-    return successResponse({ res, message: `${role} Details`, data });
+    return successResponse({ res, message: `Auth Details`, data: { role } });
   } catch (error) {
     return errorResponse({ res, message: error.message });
   }

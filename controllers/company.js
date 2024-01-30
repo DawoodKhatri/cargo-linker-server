@@ -86,10 +86,6 @@ export const companySignup = async (req, res) => {
       sameSite: "none",
     };
 
-    if (process.env.NODE_ENV === "development") {
-      options = {};
-    }
-
     const token = await company.generateToken();
 
     return successResponse({
@@ -132,10 +128,6 @@ export const companyLogin = async (req, res) => {
       secure: true,
       sameSite: "none",
     };
-
-    if (process.env.NODE_ENV === "development") {
-      options = {};
-    }
 
     const token = await company.generateToken();
 
