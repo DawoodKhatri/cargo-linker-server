@@ -3,6 +3,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import authRoutes from "./routes/auth.js";
 import companyRoutes from "./routes/company.js";
+import adminRoutes from "./routes/admin.js";
 
 const app = express();
 
@@ -12,6 +13,7 @@ app.use(cookieParser());
 app.use(cors({ origin: "*" }));
 app.use(express.static("public"));
 
+app.use("/api/admin", adminRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/company", companyRoutes);
 app.use("*", (req, res) => {

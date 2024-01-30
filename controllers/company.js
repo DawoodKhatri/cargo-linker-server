@@ -8,6 +8,7 @@ import fs from "fs";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import { VERIFICATION_STATUS } from "../constants/verificationStatus.js";
+import { errorResponse, successResponse } from "../utils/response.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -16,15 +17,17 @@ export const companyGetVerificationMail = async (req, res) => {
   try {
     const { email } = req.body;
     if (!email)
-      return res.status(400).json({
-        success: false,
+      return errorResponse({
+        res,
+        status: 400,
         message: "Please enter email address",
       });
 
     const company = await Company.findOne({ email });
     if (company)
-      return res.status(409).json({
-        success: false,
+      return errorResponse({
+        res,
+        status: 409,
         message: "Email already taken",
       });
 
@@ -41,12 +44,9 @@ export const companyGetVerificationMail = async (req, res) => {
       );
     }
 
-    return res.status(200).json({
-      success: true,
-      message: "Verification mail sent",
-    });
+    return successResponse({ res, message: "Verification mail sent" });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return errorResponse({ res, message: error.message });
   }
 };
 
@@ -54,23 +54,26 @@ export const companySignup = async (req, res) => {
   try {
     const { email, password, otp } = req.body;
     if (!email || !password || !otp)
-      return res.status(400).json({
-        success: false,
+      return errorResponse({
+        res,
+        status: 400,
         message: "Please fill all the fields",
       });
 
     const verification = await Verification.findOne({ email, otp });
     if (!verification)
-      return res.status(401).json({
-        success: false,
+      return errorResponse({
+        res,
+        status: 401,
         message: "Incorrect OTP",
       });
 
     let difference =
       (new Date().getTime() - verification.updatedAt.getTime()) / 1000 / 60;
     if (difference > 5)
-      return res.status(422).json({
-        success: false,
+      return errorResponse({
+        res,
+        status: 422,
         message: "OTP Expired",
       });
 
@@ -89,12 +92,12 @@ export const companySignup = async (req, res) => {
 
     const token = await company.generateToken();
 
-    res.status(200).cookie("token", token, options).json({
-      success: true,
+    return successResponse({
+      res: res.cookie("token", token, options),
       message: "Signup Successfull",
     });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return errorResponse({ res, message: error.message });
   }
 };
 
@@ -102,22 +105,25 @@ export const companyLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
     if (!email || !password)
-      return res.status(400).json({
-        success: false,
+      return errorResponse({
+        res,
+        status: 400,
         message: "Please fill all the fields",
       });
 
     const company = await Company.findOne({ email }).select("password");
     if (!company)
-      return res.status(404).json({
-        success: false,
+      return errorResponse({
+        res,
+        status: 404,
         message: "Account not found",
       });
 
     const isPasswordMatch = await company.matchPassword(password);
     if (!isPasswordMatch)
-      return res.status(401).json({
-        success: false,
+      return errorResponse({
+        res,
+        status: 401,
         message: "Invalid credentials",
       });
 
@@ -133,29 +139,30 @@ export const companyLogin = async (req, res) => {
 
     const token = await company.generateToken();
 
-    res.status(200).cookie("token", token, options).json({
-      success: true,
+    return successResponse({
+      res: res.cookie("token", token, options),
       message: "Login Successfull",
     });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return errorResponse({ res, message: error.message });
   }
 };
 
 export const getCompanyVerificationStatus = async (req, res) => {
   try {
-    return res.status(200).json({
-      success: true,
+    return successResponse({
+      res,
+      message: "Verification Status",
       data: {
         status: req.company.verification.status,
-        message:
+        remark:
           req.company.verification.status === VERIFICATION_STATUS.rejected
-            ? req.company.verification.message
+            ? req.company.verification.remark
             : undefined,
       },
     });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return errorResponse({ res, message: error.message });
   }
 };
 
@@ -164,8 +171,9 @@ export const submitCompanyVerificationDetails = async (req, res) => {
     if (
       req.company.verification.status === VERIFICATION_STATUS.underVerification
     )
-      return res.status(409).json({
-        success: false,
+      return errorResponse({
+        res,
+        status: 409,
         message: "Already submitted for verification",
       });
 
@@ -187,9 +195,11 @@ export const submitCompanyVerificationDetails = async (req, res) => {
         bankStatement,
       ].every(Boolean)
     )
-      return res
-        .status(400)
-        .json({ success: false, message: "Please fill all the fields" });
+      return errorResponse({
+        res,
+        status: 400,
+        message: "Please fill all the fields",
+      });
 
     // fs.writeFileSync(
     //   path.join(
@@ -237,10 +247,11 @@ export const submitCompanyVerificationDetails = async (req, res) => {
       { new: true }
     );
 
-    return res
-      .status(200)
-      .json({ success: true, message: "Details submitted for verification" });
+    return successResponse({
+      res,
+      message: "Details submitted for verification",
+    });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return errorResponse({ res, message: error.message });
   }
 };

@@ -1,15 +1,14 @@
 import jwt from "jsonwebtoken";
 import { USER_ROLES } from "../constants/userRoles.js";
 import Company from "../models/company.js";
+import Admin from "../models/admin.js";
+import { errorResponse } from "../utils/response.js";
 
 export const isAuthenticated = async (req, res, next) => {
   try {
     const { token } = req.cookies;
     if (!token)
-      return res.status(403).json({
-        success: false,
-        message: "Please login first",
-      });
+      return errorResponse({ res, status: 403, message: "Please login first" });
 
     const { _id, role } = jwt.verify(token, process.env.JWT_SECRET);
 
@@ -18,22 +17,50 @@ export const isAuthenticated = async (req, res, next) => {
 
     next();
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return errorResponse({ res, message: error.message });
+  }
+};
+
+export const isAdmin = async (req, res, next) => {
+  try {
+    if (req.role !== USER_ROLES.admin)
+      return errorResponse({
+        res,
+        status: 403,
+        message: "Please login as admin first",
+      });
+
+    const admin = await Admin.findById(req._id);
+    if (!admin)
+      return errorResponse({
+        res,
+        status: 403,
+        message: "Please login as admin first",
+      });
+
+    req._id = undefined;
+    req.admin = admin;
+
+    next();
+  } catch (error) {
+    return errorResponse({ res, message: error.message });
   }
 };
 
 export const isCompany = async (req, res, next) => {
   try {
     if (req.role !== USER_ROLES.company)
-      return res.json(403, {
-        success: false,
+      return errorResponse({
+        res,
+        status: 403,
         message: "Please login as company first",
       });
 
     const company = await Company.findById(req._id);
     if (!company)
-      return res.json(403, {
-        success: false,
+      return errorResponse({
+        res,
+        status: 403,
         message: "Please login as company first",
       });
 
@@ -42,6 +69,6 @@ export const isCompany = async (req, res, next) => {
 
     next();
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return errorResponse({ res, message: error.message });
   }
 };

@@ -1,23 +1,24 @@
+/** @type {import("express").RequestHandler} */
+
+import { errorResponse, successResponse } from "../utils/response.js";
+
 export const logout = async (req, res) => {
   try {
-    return res.status(200).clearCookie("token").json({
-      success: true,
+    return successResponse({
+      res: res.clearCookie("token"),
       message: "Logout Successfull",
     });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return errorResponse({ res, message: error.message });
   }
 };
 
 export const getUser = async (req, res) => {
   try {
     const { data, role } = req;
-    return res.status(200).json({
-      success: true,
-      message: `${role} Details`,
-      data,
-    });
+
+    return successResponse({ res, message: `${role} Details`, data });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    return errorResponse({ res, message: error.message });
   }
 };
