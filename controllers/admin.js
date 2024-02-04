@@ -4,6 +4,7 @@ import { VERIFICATION_STATUS } from "../constants/verificationStatus.js";
 import Admin from "../models/admin.js";
 import Company from "../models/company.js";
 import { errorResponse, successResponse } from "../utils/response.js";
+import { getFileUrl } from "../utils/storage.js";
 
 export const adminLogin = async (req, res) => {
   try {
@@ -63,9 +64,13 @@ export const getPendingVerificationCompanies = async (req, res) => {
 export const getCompanyDetails = async (req, res) => {
   try {
     const { companyId } = req.params;
-    const company = await Company.findById(companyId);
+    let company = await Company.findById(companyId);
     if (!company)
       return errorResponse({ res, status: 404, message: "Company not found" });
+
+    company = company.toObject();
+    company.license = await getFileUrl(company.license);
+    company.bankStatement = await getFileUrl(company.bankStatement);
 
     return successResponse({
       res,

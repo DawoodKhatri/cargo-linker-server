@@ -9,6 +9,7 @@ import { fileURLToPath } from "url";
 import { dirname } from "path";
 import { VERIFICATION_STATUS } from "../constants/verificationStatus.js";
 import { errorResponse, successResponse } from "../utils/response.js";
+import { deleteFile, uploadFile } from "../utils/storage.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -193,51 +194,35 @@ export const submitCompanyVerificationDetails = async (req, res) => {
         message: "Please fill all the fields",
       });
 
-    // fs.writeFileSync(
-    //   path.join(
-    //     __dirname,
-    //     "../uploaded files",
-    //     "license",
-    //     license.originalname
-    //   ),
-    //   license.buffer
-    // );
+    // if (
+    //   !license.mimetype.includes("image") ||
+    //   !bankStatement.mimetype.includes("image")
+    // )
+    //   return errorResponse({
+    //     res,
+    //     status: 400,
+    //     message: "Unsupported file type, only images are supported",
+    //   });
 
-    // fs.writeFileSync(
-    //   path.join(
-    //     __dirname,
-    //     "../uploaded files",
-    //     "bankStatement",
-    //     bankStatement.originalname
-    //   ),
-    //   bankStatement.buffer
-    // );
+    const company = await Company.findById(req.company._id);
 
-    const company = await Company.findByIdAndUpdate(
-      req.company._id,
-      {
-        $set: {
-          name,
-          serviceType,
-          establishmentDate,
-          registrationNumber,
-          // license: path.join(
-          //   __dirname,
-          //   "../uploaded files",
-          //   license.originalname
-          // ),
-          // bankStatement: path.join(
-          //   __dirname,
-          //   "../uploaded files",
-          //   bankStatement.originalname
-          // ),
-          license: license.originalname,
-          bankStatement: bankStatement.originalname,
-          verification: { status: VERIFICATION_STATUS.underVerification },
-        },
-      },
-      { new: true }
-    );
+    if (company.license) deleteFile(company.license);
+    if (company.bankStatement) deleteFile(company.bankStatement);
+
+    const licensePath = await uploadFile("documents", license);
+    const bankStatementPath = await uploadFile("documents", bankStatement);
+
+    company.set({
+      name,
+      serviceType,
+      establishmentDate,
+      registrationNumber,
+      license: licensePath,
+      bankStatement: bankStatementPath,
+      verification: { status: VERIFICATION_STATUS.underVerification },
+    });
+
+    await company.save();
 
     return successResponse({
       res,
