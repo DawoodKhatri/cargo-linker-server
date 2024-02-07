@@ -3,6 +3,7 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import authRoutes from "./routes/auth.js";
 import companyRoutes from "./routes/company.js";
+import traderRoutes from "./routes/trader.js";
 import adminRoutes from "./routes/admin.js";
 
 const app = express();
@@ -21,6 +22,7 @@ app.use(express.static("public"));
 app.use("/api/admin", adminRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/company", companyRoutes);
+app.use("/api/trader", traderRoutes);
 app.use("*", (req, res) => {
   return res.status(404).json({ success: false, message: "Invalid Request" });
 });
