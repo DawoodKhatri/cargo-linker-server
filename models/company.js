@@ -1,6 +1,6 @@
 import { Schema, model } from "mongoose";
 import { SERVICE_TYPES } from "../constants/serviceType.js";
-import { VERIFICATION_STATUS } from "../constants/verificationStatus.js";
+import { VERIFICATION_STATUS } from "../constants/company.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { USER_ROLES } from "../constants/userRoles.js";
@@ -25,6 +25,7 @@ const companySchema = new Schema(
       },
       remark: { type: String },
     },
+    containers: [{ type: ObjectId, ref: "Container" }],
   },
   { versionKey: false }
 );

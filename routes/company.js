@@ -1,8 +1,10 @@
 import { Router } from "express";
 import {
   companyGetVerificationMail,
+  companyListContainer,
   companyLogin,
   companySignup,
+  getCompanyListedContainers,
   getCompanyVerificationStatus,
   submitCompanyVerificationDetails,
 } from "../controllers/company.js";
@@ -26,6 +28,20 @@ companyRoutes.post(
   isCompany,
   multer.any(),
   submitCompanyVerificationDetails
+);
+
+companyRoutes.get(
+  "/containers",
+  isAuthenticated,
+  isCompany,
+  getCompanyListedContainers
+);
+
+companyRoutes.post(
+  "/containers",
+  isAuthenticated,
+  isCompany,
+  companyListContainer
 );
 
 export default companyRoutes;

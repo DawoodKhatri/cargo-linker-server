@@ -7,9 +7,14 @@ import { generateOTP, sendVerificationMail } from "../utils/verification.js";
 import fs from "fs";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
-import { VERIFICATION_STATUS } from "../constants/verificationStatus.js";
+import {
+  CONTAINER_SIZES,
+  CONTAINER_TYPES,
+  VERIFICATION_STATUS,
+} from "../constants/company.js";
 import { errorResponse, successResponse } from "../utils/response.js";
 import { deleteFile, uploadFile } from "../utils/storage.js";
+import Container from "../models/container.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -227,6 +232,85 @@ export const submitCompanyVerificationDetails = async (req, res) => {
     return successResponse({
       res,
       message: "Details submitted for verification",
+    });
+  } catch (error) {
+    return errorResponse({ res, message: error.message });
+  }
+};
+
+export const getCompanyListedContainers = async (req, res) => {
+  try {
+    const company = await Company.findById(req.company._id).populate(
+      "containers"
+    );
+
+    return successResponse({
+      res,
+      message: "Listed Containers",
+      data: { containers: company.containers },
+    });
+  } catch (error) {
+    return errorResponse({ res, message: error.message });
+  }
+};
+
+export const companyListContainer = async (req, res) => {
+  try {
+    const { containerId, type, size, due, dimension, price, pickup, drop } =
+      req.body;
+
+    if (
+      !containerId ||
+      !type ||
+      !size ||
+      !due ||
+      !dimension.length ||
+      !dimension.width ||
+      !dimension.height ||
+      !price ||
+      !pickup.lat ||
+      !pickup.long ||
+      !drop.lat ||
+      !drop.long
+    )
+      return errorResponse({
+        res,
+        status: 400,
+        message: "Please fill all the fields",
+      });
+
+    if (!CONTAINER_TYPES.includes(type))
+      return errorResponse({
+        res,
+        status: 400,
+        message: "Invalid Container Type",
+      });
+
+    if (!CONTAINER_SIZES.includes(size))
+      return errorResponse({
+        res,
+        status: 400,
+        message: "Invalid Container Size",
+      });
+
+    const container = await Container.create({
+      containerId,
+      type,
+      size,
+      due,
+      dimension,
+      price,
+      pickup,
+      drop,
+    });
+
+    await Company.findByIdAndUpdate(req.company._id, {
+      $push: { containers: container._id },
+    });
+
+    return successResponse({
+      res,
+      message: "Container Listed Successfully",
     });
   } catch (error) {
     return errorResponse({ res, message: error.message });

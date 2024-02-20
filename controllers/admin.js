@@ -1,6 +1,6 @@
 /** @type {import("express").RequestHandler} */
 
-import { VERIFICATION_STATUS } from "../constants/verificationStatus.js";
+import { VERIFICATION_STATUS } from "../constants/company.js";
 import Admin from "../models/admin.js";
 import Company from "../models/company.js";
 import { errorResponse, successResponse } from "../utils/response.js";
