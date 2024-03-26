@@ -3,6 +3,7 @@ import { USER_ROLES } from "../constants/userRoles.js";
 import Company from "../models/company.js";
 import Admin from "../models/admin.js";
 import { errorResponse } from "../utils/response.js";
+import Trader from "../models/trader.js";
 
 export const isAuthenticated = async (req, res, next) => {
   try {
@@ -66,6 +67,32 @@ export const isCompany = async (req, res, next) => {
 
     req._id = undefined;
     req.company = company.toObject();
+
+    next();
+  } catch (error) {
+    return errorResponse({ res, message: error.message });
+  }
+};
+
+export const isTrader = async (req, res, next) => {
+  try {
+    if (req.role !== USER_ROLES.trader)
+      return errorResponse({
+        res,
+        status: 403,
+        message: "Please login as trader first",
+      });
+
+    const trader = await Trader.findById(req._id);
+    if (!trader)
+      return errorResponse({
+        res,
+        status: 403,
+        message: "Please login as trader first",
+      });
+
+    req._id = undefined;
+    req.trader = trader.toObject();
 
     next();
   } catch (error) {
