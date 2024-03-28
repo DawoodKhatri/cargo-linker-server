@@ -16,10 +16,12 @@ const containerSchema = new Schema(
     },
     price: { type: Number, required: true },
     pickup: {
+      address: { type: String, required: true },
       lat: { type: Number, required: true },
       long: { type: Number, required: true },
     },
     drop: {
+      address: { type: String, required: true },
       lat: { type: Number, required: true },
       long: { type: Number, required: true },
     },

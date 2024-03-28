@@ -1,10 +1,8 @@
 /** @type {import("express").RequestHandler} */
 
-import path from "path";
 import Company from "../models/company.js";
 import Verification from "../models/verification.js";
 import { generateOTP, sendVerificationMail } from "../utils/verification.js";
-import fs from "fs";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import {
@@ -15,6 +13,7 @@ import {
 import { errorResponse, successResponse } from "../utils/response.js";
 import { deleteFile, uploadFile } from "../utils/storage.js";
 import Container from "../models/container.js";
+import { getPlacesFromAddress } from "../utils/geocoding.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -157,6 +156,15 @@ export const getCompanyVerificationStatus = async (req, res) => {
           req.company.verification.status === VERIFICATION_STATUS.rejected
             ? req.company.verification.remark
             : undefined,
+        details:
+          req.company.verification.status === VERIFICATION_STATUS.verified
+            ? {
+                name: req.company.name,
+                serviceType: req.company.serviceType,
+                establishmentDate: req.company.establishmentDate,
+                registrationNumber: req.company.registrationNumber,
+              }
+            : undefined,
       },
     });
   } catch (error) {
@@ -256,8 +264,16 @@ export const getCompanyListedContainers = async (req, res) => {
 
 export const companyListContainer = async (req, res) => {
   try {
-    const { containerId, type, size, due, dimension, price, pickup, drop } =
-      req.body;
+    const {
+      containerId,
+      type,
+      size,
+      due,
+      dimension,
+      price,
+      pickupAddress,
+      dropAddress,
+    } = req.body;
 
     if (
       !containerId ||
@@ -268,10 +284,8 @@ export const companyListContainer = async (req, res) => {
       !dimension.width ||
       !dimension.height ||
       !price ||
-      !pickup.lat ||
-      !pickup.long ||
-      !drop.lat ||
-      !drop.long
+      !pickupAddress ||
+      !dropAddress
     )
       return errorResponse({
         res,
@@ -293,6 +307,28 @@ export const companyListContainer = async (req, res) => {
         message: "Invalid Container Size",
       });
 
+    const pickupPlaces = await getPlacesFromAddress(pickupAddress);
+
+    if (pickupPlaces.length === 0)
+      return errorResponse({ res, message: "Pickup location not found" });
+
+    const pickupLocation = {
+      address: pickupAddress,
+      lat: pickupPlaces[0].geometry.location.lat,
+      long: pickupPlaces[0].geometry.location.lng,
+    };
+
+    const dropPlaces = await getPlacesFromAddress(dropAddress);
+
+    if (dropPlaces.length === 0)
+      return errorResponse({ res, message: "Drop location not found" });
+
+    const dropLocation = {
+      address: dropAddress,
+      lat: dropPlaces[0].geometry.location.lat,
+      long: dropPlaces[0].geometry.location.lng,
+    };
+
     const container = await Container.create({
       containerId,
       type,
@@ -300,8 +336,8 @@ export const companyListContainer = async (req, res) => {
       due,
       dimension,
       price,
-      pickup,
-      drop,
+      pickup: pickupLocation,
+      drop: dropLocation,
     });
 
     await Company.findByIdAndUpdate(req.company._id, {

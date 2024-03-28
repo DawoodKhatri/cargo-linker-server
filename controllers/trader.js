@@ -5,6 +5,7 @@ import Verification from "../models/verification.js";
 import { generateOTP, sendVerificationMail } from "../utils/verification.js";
 import { errorResponse, successResponse } from "../utils/response.js";
 import Container from "../models/container.js";
+import { getPlacesFromAddress } from "../utils/geocoding.js";
 
 export const traderGetVerificationMail = async (req, res) => {
   try {
@@ -142,29 +143,17 @@ export const searchContainers = async (req, res) => {
         message: "Please provide pickup & drop address",
       });
 
-    const pickupPlaces = (
-      await (
-        await fetch(
-          `https://maps.googleapis.com/maps/api/geocode/json?key=AIzaSyDR6AvcSYurr22yWemfUuXT3CLjkvNDUsg&address=${pickupAddress}`
-        )
-      ).json()
-    ).results;
+    const pickupPlaces = await getPlacesFromAddress(pickupAddress);
 
     if (pickupPlaces.length === 0)
-      return errorResponse({ res, message: "Drop location not found" });
+      return errorResponse({ res, message: "Pickup location not found" });
 
     const pickupLocation = {
       lat: pickupPlaces[0].geometry.location.lat,
       long: pickupPlaces[0].geometry.location.lng,
     };
 
-    const dropPlaces = (
-      await (
-        await fetch(
-          `https://maps.googleapis.com/maps/api/geocode/json?key=AIzaSyDR6AvcSYurr22yWemfUuXT3CLjkvNDUsg&address=${dropAddress}`
-        )
-      ).json()
-    ).results;
+    const dropPlaces = await getPlacesFromAddress(dropAddress);
 
     if (dropPlaces.length === 0)
       return errorResponse({ res, message: "Drop location not found" });
@@ -173,8 +162,6 @@ export const searchContainers = async (req, res) => {
       lat: dropPlaces[0].geometry.location.lat,
       long: dropPlaces[0].geometry.location.lng,
     };
-
-    console.log(pickupLocation, dropLocation);
 
     const tolerance = 0.01;
 
