@@ -1,7 +1,7 @@
 import { Router } from "express";
 import {
   getContainerDetails,
-  getPickupLocations,
+  searchContainers,
   traderGetVerificationMail,
   traderLogin,
   traderSignup,
@@ -14,10 +14,10 @@ traderRoutes.post("/auth/verification", traderGetVerificationMail);
 traderRoutes.post("/auth/signup", traderSignup);
 traderRoutes.post("/auth/login", traderLogin);
 traderRoutes.get(
-  "/getPickupLocations",
+  "/searchContainers",
   isAuthenticated,
   isTrader,
-  getPickupLocations
+  searchContainers
 );
 traderRoutes.get(
   "/container/:containerId",

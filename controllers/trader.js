@@ -133,19 +133,60 @@ export const traderLogin = async (req, res) => {
   }
 };
 
-export const getPickupLocations = async (req, res) => {
+export const searchContainers = async (req, res) => {
   try {
-    const dropLocation = {
-      lat: Number(req.query.dropLat),
-      long: Number(req.query.dropLong),
+    const { pickupAddress, dropAddress } = req.query;
+    if (!pickupAddress || !dropAddress)
+      return errorResponse({
+        res,
+        message: "Please provide pickup & drop address",
+      });
+
+    const pickupPlaces = (
+      await (
+        await fetch(
+          `https://maps.googleapis.com/maps/api/geocode/json?key=AIzaSyDR6AvcSYurr22yWemfUuXT3CLjkvNDUsg&address=${pickupAddress}`
+        )
+      ).json()
+    ).results;
+
+    if (pickupPlaces.length === 0)
+      return errorResponse({ res, message: "Drop location not found" });
+
+    const pickupLocation = {
+      lat: pickupPlaces[0].geometry.location.lat,
+      long: pickupPlaces[0].geometry.location.lng,
     };
-    
-    if (!dropLocation.lat || !dropLocation.long)
-      return errorResponse({ res, message: "Please provide drop location" });
+
+    const dropPlaces = (
+      await (
+        await fetch(
+          `https://maps.googleapis.com/maps/api/geocode/json?key=AIzaSyDR6AvcSYurr22yWemfUuXT3CLjkvNDUsg&address=${dropAddress}`
+        )
+      ).json()
+    ).results;
+
+    if (dropPlaces.length === 0)
+      return errorResponse({ res, message: "Drop location not found" });
+
+    const dropLocation = {
+      lat: dropPlaces[0].geometry.location.lat,
+      long: dropPlaces[0].geometry.location.lng,
+    };
+
+    console.log(pickupLocation, dropLocation);
 
     const tolerance = 0.01;
 
-    const pickupLocations = await Container.find({
+    const containers = await Container.find({
+      "pickup.lat": {
+        $gte: pickupLocation.lat - tolerance,
+        $lte: pickupLocation.lat + tolerance,
+      },
+      "pickup.long": {
+        $gte: pickupLocation.long - tolerance,
+        $lte: pickupLocation.long + tolerance,
+      },
       "drop.lat": {
         $gte: dropLocation.lat - tolerance,
         $lte: dropLocation.lat + tolerance,
@@ -154,9 +195,9 @@ export const getPickupLocations = async (req, res) => {
         $gte: dropLocation.long - tolerance,
         $lte: dropLocation.long + tolerance,
       },
-    }).select("pickup");
+    });
 
-    return successResponse({ res, data: pickupLocations });
+    return successResponse({ res, data: { containers } });
   } catch (error) {
     return errorResponse({ res, message: error.message });
   }
