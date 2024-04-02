@@ -14,7 +14,11 @@ app.use(cookieParser());
 app.use(
   cors({
     credentials: true,
-    origin: ["http://localhost:3000", "https://cargo-linker.vercel.app"],
+    origin: [
+      "http://localhost:3000",
+      "https://cargo-linker.vercel.app",
+      "https://cargolinker.dawood.codes",
+    ],
   })
 );
 app.use(express.static("public"));
