@@ -310,7 +310,11 @@ export const companyListContainer = async (req, res) => {
     const pickupPlaces = await getPlacesFromAddress(pickupAddress);
 
     if (pickupPlaces.length === 0)
-      return errorResponse({ res, message: "Pickup location not found" });
+      return errorResponse({
+        res,
+        status: 404,
+        message: "Pickup location not found",
+      });
 
     const pickupLocation = {
       address: pickupAddress,
@@ -321,7 +325,11 @@ export const companyListContainer = async (req, res) => {
     const dropPlaces = await getPlacesFromAddress(dropAddress);
 
     if (dropPlaces.length === 0)
-      return errorResponse({ res, message: "Drop location not found" });
+      return errorResponse({
+        res,
+        status: 404,
+        message: "Drop location not found",
+      });
 
     const dropLocation = {
       address: dropAddress,

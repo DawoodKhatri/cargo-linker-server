@@ -140,13 +140,18 @@ export const searchContainers = async (req, res) => {
     if (!pickupAddress || !dropAddress)
       return errorResponse({
         res,
+        status: 400,
         message: "Please provide pickup & drop address",
       });
 
     const pickupPlaces = await getPlacesFromAddress(pickupAddress);
 
     if (pickupPlaces.length === 0)
-      return errorResponse({ res, message: "Pickup location not found" });
+      return errorResponse({
+        res,
+        status: 404,
+        message: "Pickup location not found",
+      });
 
     const pickupLocation = {
       lat: pickupPlaces[0].geometry.location.lat,
@@ -156,7 +161,11 @@ export const searchContainers = async (req, res) => {
     const dropPlaces = await getPlacesFromAddress(dropAddress);
 
     if (dropPlaces.length === 0)
-      return errorResponse({ res, message: "Drop location not found" });
+      return errorResponse({
+        res,
+        status: 404,
+        message: "Drop location not found",
+      });
 
     const dropLocation = {
       lat: dropPlaces[0].geometry.location.lat,
@@ -194,11 +203,19 @@ export const getContainerDetails = async (req, res) => {
   try {
     const { containerId } = req.params;
     if (!containerId)
-      return errorResponse({ res, message: "Please provide container ID" });
+      return errorResponse({
+        res,
+        status: 400,
+        message: "Please provide container ID",
+      });
 
     const container = await Container.findById(containerId);
     if (!container)
-      return errorResponse({ res, message: "Container not found" });
+      return errorResponse({
+        res,
+        status: 404,
+        message: "Container not found",
+      });
 
     return successResponse({ res, data: container });
   } catch (error) {
