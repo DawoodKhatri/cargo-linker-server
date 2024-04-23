@@ -5,7 +5,11 @@ import Verification from "../models/verification.js";
 import { generateOTP, sendVerificationMail } from "../utils/verification.js";
 import { errorResponse, successResponse } from "../utils/response.js";
 import Container from "../models/container.js";
-import { getPlacesFromAddress } from "../utils/geocoding.js";
+import {
+  getPlacesFromAddress,
+  getEncodedPolylines,
+} from "../utils/googleMaps.js";
+import Company from "../models/company.js";
 
 export const traderGetVerificationMail = async (req, res) => {
   try {
@@ -174,7 +178,7 @@ export const searchContainers = async (req, res) => {
 
     const tolerance = 0.01;
 
-    const containers = await Container.find({
+    let containers = await Container.find({
       "pickup.lat": {
         $gte: pickupLocation.lat - tolerance,
         $lte: pickupLocation.lat + tolerance,
@@ -192,6 +196,22 @@ export const searchContainers = async (req, res) => {
         $lte: dropLocation.long + tolerance,
       },
     });
+
+    for (const container of containers) {
+      const company = await Company.findOne({ containers: container._id });
+
+      const encodedPolylinePoints = await getEncodedPolylines(
+        container.pickup,
+        container.drop
+      );
+
+      containers[containers.indexOf(container)] = {
+        ...container.toObject(),
+        encodedPolylinePoints: encodedPolylinePoints || [],
+        companyName: company.name,
+        serviceType: company.serviceType,
+      };
+    }
 
     return successResponse({ res, data: { containers } });
   } catch (error) {
@@ -217,7 +237,16 @@ export const getContainerDetails = async (req, res) => {
         message: "Container not found",
       });
 
-    return successResponse({ res, data: container });
+    const company = await Company.findOne({ containers: containerId });
+
+    return successResponse({
+      res,
+      data: {
+        ...container.toObject(),
+        companyName: company.name,
+        serviceType: company.serviceType,
+      },
+    });
   } catch (error) {
     return errorResponse({ res, message: error.message });
   }

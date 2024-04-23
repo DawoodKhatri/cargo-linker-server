@@ -13,7 +13,10 @@ import {
 import { errorResponse, successResponse } from "../utils/response.js";
 import { deleteFile, uploadFile } from "../utils/storage.js";
 import Container from "../models/container.js";
-import { getPlacesFromAddress } from "../utils/geocoding.js";
+import {
+  getEncodedPolylines,
+  getPlacesFromAddress,
+} from "../utils/googleMaps.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -252,10 +255,23 @@ export const getCompanyListedContainers = async (req, res) => {
       "containers"
     );
 
+    const containers = await Promise.all(
+      company.containers.map(async (container) => {
+        const encodedPolylinePoints = await getEncodedPolylines(
+          container.pickup,
+          container.drop
+        );
+        return {
+          ...container.toObject(),
+          encodedPolylinePoints: encodedPolylinePoints ?? "",
+        };
+      })
+    );
+
     return successResponse({
       res,
       message: "Listed Containers",
-      data: { containers: company.containers },
+      data: { containers },
     });
   } catch (error) {
     return errorResponse({ res, message: error.message });
