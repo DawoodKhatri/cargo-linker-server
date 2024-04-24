@@ -198,6 +198,7 @@ export const searchContainers = async (req, res) => {
         $gte: dropLocation.long - tolerance,
         $lte: dropLocation.long + tolerance,
       },
+      booking: { $exists: false },
     });
 
     for (const container of containers) {
@@ -304,10 +305,12 @@ export const completeBooking = async (req, res) => {
   try {
     const {
       payload: {
-        entity: {
-          order_id,
-          amount,
-          notes: { container_id, trader_id } = {},
+        payment: {
+          entity: {
+            order_id,
+            amount,
+            notes: { container_id, trader_id } = {},
+          } = {},
         } = {},
       } = {},
     } = req.body;
