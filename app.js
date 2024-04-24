@@ -17,7 +17,7 @@ app.use(
     origin: [
       "http://localhost:3000",
       "https://cargo-linker.vercel.app",
-      "https://cargolinker.dawood.codes",
+      "https://cargo-linker.dawood.codes",
     ],
   })
 );
