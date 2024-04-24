@@ -26,6 +26,7 @@ const companySchema = new Schema(
       remark: { type: String },
     },
     containers: [{ type: ObjectId, ref: "Container" }],
+    bookings: [{ type: ObjectId, ref: "Booking" }],
   },
   { versionKey: false }
 );

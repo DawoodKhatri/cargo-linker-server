@@ -4,6 +4,7 @@ import Company from "../models/company.js";
 import Admin from "../models/admin.js";
 import { errorResponse } from "../utils/response.js";
 import Trader from "../models/trader.js";
+import crypto from "crypto";
 
 export const isAuthenticated = async (req, res, next) => {
   try {
@@ -93,6 +94,28 @@ export const isTrader = async (req, res, next) => {
 
     req._id = undefined;
     req.trader = trader.toObject();
+
+    next();
+  } catch (error) {
+    return errorResponse({ res, message: error.message });
+  }
+};
+
+export const isRazorpayAuthenticated = async (req, res, next) => {
+  try {
+    const razorpaySignature = req.headers["x-razorpay-signature"];
+    const webhookBody = JSON.stringify(req.body);
+
+    const hmac = crypto.createHmac(
+      "sha256",
+      process.env.RAZORPAY_WEBHOOK_SECRET
+    );
+    hmac.update(webhookBody);
+    const calculatedSignature = hmac.digest("hex");
+
+    if (calculatedSignature != razorpaySignature) {
+      return res.status(400).json({ message: "Invalid Signature" });
+    }
 
     next();
   } catch (error) {

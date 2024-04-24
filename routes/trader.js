@@ -5,8 +5,14 @@ import {
   traderGetVerificationMail,
   traderLogin,
   traderSignup,
+  startBooking,
+  completeBooking,
 } from "../controllers/trader.js";
-import { isAuthenticated, isTrader } from "../middlewares/checkAuth.js";
+import {
+  isAuthenticated,
+  isRazorpayAuthenticated,
+  isTrader,
+} from "../middlewares/checkAuth.js";
 
 const traderRoutes = Router();
 
@@ -24,6 +30,17 @@ traderRoutes.get(
   isAuthenticated,
   isTrader,
   getContainerDetails
+);
+traderRoutes.post(
+  "/container/:containerId/startBooking",
+  isAuthenticated,
+  isTrader,
+  startBooking
+);
+traderRoutes.post(
+  "/completeBooking",
+  isRazorpayAuthenticated,
+  completeBooking
 );
 
 export default traderRoutes;

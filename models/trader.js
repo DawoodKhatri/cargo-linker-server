@@ -12,6 +12,7 @@ const traderSchema = new Schema(
     email: { type: String, unique: true, required: true },
     password: { type: String, select: false, required: true },
     name: { type: String },
+    bookings: [{ type: ObjectId, ref: "Booking" }],
   },
   { versionKey: false }
 );

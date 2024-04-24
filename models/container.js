@@ -1,7 +1,7 @@
 import { Schema, model } from "mongoose";
 import { CONTAINER_SIZES, CONTAINER_TYPES } from "../constants/company.js";
 
-const { String } = Schema.Types;
+const { String, ObjectId } = Schema.Types;
 
 const containerSchema = new Schema(
   {
@@ -25,6 +25,7 @@ const containerSchema = new Schema(
       lat: { type: Number, required: true },
       long: { type: Number, required: true },
     },
+    booking: { type: ObjectId, ref: "Booking" },
   },
   { versionKey: false }
 );

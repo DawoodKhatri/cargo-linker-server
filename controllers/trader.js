@@ -10,6 +10,9 @@ import {
   getEncodedPolylines,
 } from "../utils/googleMaps.js";
 import Company from "../models/company.js";
+import Razorpay from "../config/razorpay.js";
+import crypto from "crypto";
+import Booking from "../models/booking.js";
 
 export const traderGetVerificationMail = async (req, res) => {
   try {
@@ -246,6 +249,96 @@ export const getContainerDetails = async (req, res) => {
         companyName: company.name,
         serviceType: company.serviceType,
       },
+    });
+  } catch (error) {
+    return errorResponse({ res, message: error.message });
+  }
+};
+
+export const startBooking = async (req, res) => {
+  try {
+    const { containerId } = req.params;
+    if (!containerId)
+      return errorResponse({
+        res,
+        status: 400,
+        message: "Container ID is required",
+      });
+
+    const container = await Container.findById(containerId);
+    if (!container)
+      return errorResponse({
+        res,
+        status: 404,
+        message: "Container not found",
+      });
+
+    const order = await Razorpay().orders.create({
+      amount: container.price * 100,
+      currency: "INR",
+      notes: {
+        trader_id: req.trader._id,
+        container_id: containerId,
+      },
+    });
+
+    return successResponse({
+      res,
+      message: "Booking created successfully",
+      data: { order },
+    });
+  } catch (error) {
+    console.log(error);
+    return errorResponse({ res, message: error.message });
+  }
+};
+
+export const completeBooking = async (req, res) => {
+  try {
+    const {
+      order_id,
+      amount,
+      notes: { container_id, trader_id } = {},
+    } = req.body.payload.payment;
+
+    if (!order_id || !amount || !container_id || !trader_id)
+      return errorResponse({
+        res,
+        status: 400,
+        message: "Please provide all the details",
+      });
+
+    const container = await Container.findById(container_id);
+    if (!container)
+      return errorResponse({
+        res,
+        status: 404,
+        message: "Container not found",
+      });
+
+    const company = await Company.findOne({ containers: container_id });
+
+    const booking = await Booking.create({
+      container: container_id,
+      trader: trader_id,
+      company: company._id,
+      orderId: order_id,
+      amount: amount / 100,
+    });
+
+    container.booking = booking._id;
+    await container.save();
+
+    company.bookings.push(booking._id);
+    await company.save();
+
+    await Trader.findByIdAndUpdate(trader_id, {
+      $push: { bookings: booking._id },
+    });
+
+    return successResponse({
+      res,
+      message: "Booking completed successfully",
     });
   } catch (error) {
     return errorResponse({ res, message: error.message });
