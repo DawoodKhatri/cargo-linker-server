@@ -299,7 +299,7 @@ export const completeBooking = async (req, res) => {
       order_id,
       amount,
       notes: { container_id, trader_id } = {},
-    } = req.body.payload.payment;
+    } = req.body.payload.payment.entity;
 
     if (!order_id || !amount || !container_id || !trader_id)
       return errorResponse({
