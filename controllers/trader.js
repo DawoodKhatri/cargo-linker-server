@@ -273,6 +273,13 @@ export const startBooking = async (req, res) => {
         message: "Container not found",
       });
 
+    if (container.booking)
+      return errorResponse({
+        res,
+        status: 400,
+        message: "Container already booked",
+      });
+
     const order = await Razorpay().orders.create({
       amount: container.price * 100,
       currency: "INR",
@@ -296,10 +303,14 @@ export const startBooking = async (req, res) => {
 export const completeBooking = async (req, res) => {
   try {
     const {
-      order_id,
-      amount,
-      notes: { container_id, trader_id } = {},
-    } = req.body.payload.payment.entity;
+      payload: {
+        entity: {
+          order_id,
+          amount,
+          notes: { container_id, trader_id } = {},
+        } = {},
+      } = {},
+    } = req.body;
 
     if (!order_id || !amount || !container_id || !trader_id)
       return errorResponse({
@@ -314,6 +325,13 @@ export const completeBooking = async (req, res) => {
         res,
         status: 404,
         message: "Container not found",
+      });
+
+    if (container.booking)
+      return errorResponse({
+        res,
+        status: 400,
+        message: "Container already booked",
       });
 
     const company = await Company.findOne({ containers: container_id });
