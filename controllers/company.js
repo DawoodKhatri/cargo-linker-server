@@ -263,7 +263,7 @@ export const getCompanyListedContainers = async (req, res) => {
         );
         return {
           ...container.toObject(),
-          encodedPolylinePoints: encodedPolylinePoints ?? "",
+          encodedPolylinePoints: encodedPolylinePoints,
         };
       })
     );

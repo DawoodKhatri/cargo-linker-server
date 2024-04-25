@@ -211,7 +211,7 @@ export const searchContainers = async (req, res) => {
 
       containers[containers.indexOf(container)] = {
         ...container.toObject(),
-        encodedPolylinePoints: encodedPolylinePoints || [],
+        encodedPolylinePoints: encodedPolylinePoints,
         companyName: company.name,
         serviceType: company.serviceType,
       };
