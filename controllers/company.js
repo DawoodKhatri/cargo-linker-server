@@ -309,6 +309,17 @@ export const companyListContainer = async (req, res) => {
         message: "Please fill all the fields",
       });
 
+    let container = await Container.findOne({
+      containerId: containerId.toUpperCase(),
+    });
+
+    if (container)
+      return errorResponse({
+        res,
+        status: 409,
+        message: "Container ID already exists",
+      });
+
     if (!CONTAINER_TYPES.includes(type))
       return errorResponse({
         res,
@@ -353,8 +364,8 @@ export const companyListContainer = async (req, res) => {
       long: dropPlaces[0].geometry.location.lng,
     };
 
-    const container = await Container.create({
-      containerId,
+    container = await Container.create({
+      containerId: containerId.toUpperCase(),
       type,
       size,
       due,

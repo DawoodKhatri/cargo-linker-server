@@ -39,7 +39,7 @@ export const getEncodedPolylines = async (origin, destination) => {
     ).json()
   ).routes;
 
-  if (!polylinePoints || !polylinePoints.length) return [];
+  if (!polylinePoints || !polylinePoints.length) return undefined;
 
   return polylinePoints[0].polyline.encodedPolyline;
 };
