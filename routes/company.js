@@ -4,6 +4,7 @@ import {
   companyListContainer,
   companyLogin,
   companySignup,
+  getCompanyBookings,
   getCompanyListedContainers,
   getCompanyVerificationStatus,
   submitCompanyVerificationDetails,
@@ -43,5 +44,7 @@ companyRoutes.post(
   isCompany,
   companyListContainer
 );
+
+companyRoutes.get("/bookings", isAuthenticated, isCompany, getCompanyBookings);
 
 export default companyRoutes;

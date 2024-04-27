@@ -17,6 +17,7 @@ import {
   getEncodedPolylines,
   getPlacesFromAddress,
 } from "../utils/googleMaps.js";
+import Booking from "../models/booking.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -163,9 +164,12 @@ export const getCompanyVerificationStatus = async (req, res) => {
           req.company.verification.status === VERIFICATION_STATUS.verified
             ? {
                 name: req.company.name,
+                email: req.company.email,
                 serviceType: req.company.serviceType,
                 establishmentDate: req.company.establishmentDate,
                 registrationNumber: req.company.registrationNumber,
+                listedContainers: req.company.containers.length,
+                totalBookings: req.company.bookings.length,
               }
             : undefined,
       },
@@ -382,6 +386,37 @@ export const companyListContainer = async (req, res) => {
     return successResponse({
       res,
       message: "Container Listed Successfully",
+    });
+  } catch (error) {
+    return errorResponse({ res, message: error.message });
+  }
+};
+
+export const getCompanyBookings = async (req, res) => {
+  try {
+    let bookings = await Booking.find({
+      company: req.company._id,
+    })
+      .select({ company: 0 })
+      .populate([
+        {
+          path: "container",
+        },
+        {
+          path: "trader",
+          select: "name",
+        },
+      ]);
+
+    bookings = bookings.sort(
+      ({ container: { due: ADue } }, { container: { due: BDue } }) =>
+        new Date(BDue) - new Date(ADue)
+    );
+
+    return successResponse({
+      res,
+      message: "Bookings",
+      data: { bookings },
     });
   } catch (error) {
     return errorResponse({ res, message: error.message });

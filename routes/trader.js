@@ -7,6 +7,7 @@ import {
   traderSignup,
   startBooking,
   completeBooking,
+  getTraderBookings,
 } from "../controllers/trader.js";
 import {
   isAuthenticated,
@@ -37,10 +38,7 @@ traderRoutes.post(
   isTrader,
   startBooking
 );
-traderRoutes.post(
-  "/completeBooking",
-  isRazorpayAuthenticated,
-  completeBooking
-);
+traderRoutes.post("/completeBooking", isRazorpayAuthenticated, completeBooking);
+traderRoutes.get("/bookings", isAuthenticated, isTrader, getTraderBookings);
 
 export default traderRoutes;

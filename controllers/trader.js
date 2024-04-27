@@ -53,8 +53,8 @@ export const traderGetVerificationMail = async (req, res) => {
 
 export const traderSignup = async (req, res) => {
   try {
-    const { email, password, otp } = req.body;
-    if (!email || !password || !otp)
+    const { name, email, password, otp } = req.body;
+    if (!name || !email || !password || !otp)
       return errorResponse({
         res,
         status: 400,
@@ -79,7 +79,7 @@ export const traderSignup = async (req, res) => {
       });
 
     await verification.deleteOne();
-    const trader = await Trader.create({ email, password });
+    const trader = await Trader.create({ name, email, password });
 
     let options = {
       httpOnly: true,
@@ -361,6 +361,26 @@ export const completeBooking = async (req, res) => {
       res,
       message: "Booking completed successfully",
     });
+  } catch (error) {
+    return errorResponse({ res, message: error.message });
+  }
+};
+
+export const getTraderBookings = async (req, res) => {
+  try {
+    let bookings = await Booking.find({ trader: req.trader._id })
+      .select({ trader: 0 })
+      .populate([
+        { path: "container" },
+        { path: "company", select: "name serviceType" },
+      ]);
+
+    bookings = bookings.sort(
+      ({ container: { due: ADue } }, { container: { due: BDue } }) =>
+        new Date(BDue) - new Date(ADue)
+    );
+
+    return successResponse({ res, data: { bookings } });
   } catch (error) {
     return errorResponse({ res, message: error.message });
   }

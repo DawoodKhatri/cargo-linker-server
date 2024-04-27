@@ -9,6 +9,7 @@ const { String, ObjectId } = Schema.Types;
 
 const traderSchema = new Schema(
   {
+    name: { type: String, required: true },
     email: { type: String, unique: true, required: true },
     password: { type: String, select: false, required: true },
     name: { type: String },
