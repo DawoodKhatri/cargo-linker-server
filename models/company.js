@@ -28,7 +28,7 @@ const companySchema = new Schema(
     containers: [{ type: ObjectId, ref: "Container" }],
     bookings: [{ type: ObjectId, ref: "Booking" }],
   },
-  { versionKey: false }
+  { versionKey: false, timestamps: true  }
 );
 
 companySchema.pre("save", async function (next) {

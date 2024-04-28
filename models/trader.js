@@ -15,7 +15,7 @@ const traderSchema = new Schema(
     name: { type: String },
     bookings: [{ type: ObjectId, ref: "Booking" }],
   },
-  { versionKey: false }
+  { versionKey: false , timestamps: true }
 );
 
 traderSchema.pre("save", async function (next) {

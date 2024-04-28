@@ -27,7 +27,7 @@ const containerSchema = new Schema(
     },
     booking: { type: ObjectId, ref: "Booking" },
   },
-  { versionKey: false }
+  { versionKey: false, timestamps: true  }
 );
 
 const Container = model("Container", containerSchema);

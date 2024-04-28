@@ -10,7 +10,7 @@ const adminSchema = new Schema(
     username: { type: String, unique: true, required: true },
     password: { type: String, select: false, required: true },
   },
-  { versionKey: false }
+  { versionKey: false, timestamps: true }
 );
 
 adminSchema.pre("save", async function (next) {

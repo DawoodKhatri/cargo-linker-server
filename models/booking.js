@@ -1,6 +1,6 @@
 import { Schema, model } from "mongoose";
 
-const { ObjectId } = Schema.Types;
+const { ObjectId, String, Number, Date } = Schema.Types;
 
 const bookingSchema = new Schema(
   {
@@ -11,7 +11,7 @@ const bookingSchema = new Schema(
     amount: { type: Number, required: true },
     paymentDisbursed: { type: Boolean, default: false },
   },
-  { versionKey: false }
+  { versionKey: false, timestamps: true }
 );
 
 const Booking = model("Booking", bookingSchema);
