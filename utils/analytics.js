@@ -6,7 +6,7 @@ export const getAnalyticLabels = () => {
   let year = today.getFullYear();
   const labels = [];
 
-  for (let i = 0; i < 12; i++) {
+  for (let i = 0; i < 6; i++) {
     if (month === 11) {
       year--;
     }
