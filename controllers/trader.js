@@ -372,7 +372,7 @@ export const getTraderBookings = async (req, res) => {
       .select({ trader: 0 })
       .populate([
         { path: "container" },
-        { path: "company", select: "name serviceType" },
+        { path: "company", select: "name email serviceType" },
       ]);
 
     bookings = bookings.sort(

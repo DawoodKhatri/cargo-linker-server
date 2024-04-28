@@ -404,7 +404,7 @@ export const getCompanyBookings = async (req, res) => {
         },
         {
           path: "trader",
-          select: "name",
+          select: "name email",
         },
       ]);
 
