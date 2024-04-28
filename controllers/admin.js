@@ -1,10 +1,15 @@
 /** @type {import("express").RequestHandler} */
 
+import dayjs from "dayjs";
 import { VERIFICATION_STATUS } from "../constants/company.js";
 import Admin from "../models/admin.js";
+import Booking from "../models/booking.js";
 import Company from "../models/company.js";
 import { errorResponse, successResponse } from "../utils/response.js";
 import { getFileUrl } from "../utils/storage.js";
+import { getAnalyticLabels } from "../utils/analytics.js";
+import Trader from "../models/trader.js";
+import Container from "../models/container.js";
 
 export const adminLogin = async (req, res) => {
   try {
@@ -120,6 +125,45 @@ export const rejectCompany = async (req, res) => {
     return successResponse({
       res,
       message: "Company Rejected",
+    });
+  } catch (error) {
+    return errorResponse({ res, message: error.message });
+  }
+};
+
+export const getAnalytics = async (req, res) => {
+  try {
+    const analytics = Object.fromEntries(
+      getAnalyticLabels().map((label) => [
+        label,
+        { containers: 0, bookings: 0 },
+      ])
+    );
+
+    const containers = await Container.find({}).select("createdAt");
+
+    containers.forEach((company) => {
+      const date = new Date(company.createdAt);
+      const label = dayjs(date).format("MMM YYYY");
+      if (analytics[label] !== undefined) {
+        analytics[label]["containers"] += 1;
+      }
+    });
+
+    const bookings = await Booking.find({}).select("createdAt");
+
+    bookings.forEach((booking) => {
+      const date = new Date(booking.createdAt);
+      const label = dayjs(date).format("MMM YYYY");
+      if (analytics[label] !== undefined) {
+        analytics[label]["bookings"] += 1;
+      }
+    });
+
+    return successResponse({
+      res,
+      message: "Analytics",
+      data: { analytics },
     });
   } catch (error) {
     return errorResponse({ res, message: error.message });

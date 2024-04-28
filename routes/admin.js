@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   acceptCompany,
   adminLogin,
+  getAnalytics,
   getCompanyDetails,
   getPendingVerificationCompanies,
   rejectCompany,
@@ -38,5 +39,7 @@ adminRoutes.post(
   isAdmin,
   rejectCompany
 );
+
+adminRoutes.get("/analytics", isAuthenticated, isAdmin, getAnalytics);
 
 export default adminRoutes;
